@@ -1,0 +1,204 @@
+{% extends "base.html" %}
+
+{% block title %}{{ city.name }} ({{ city.name_cn }}) — SinoVista{% endblock %}
+
+{% block content %}
+<section class="city-hero">
+    <div class="city-hero-bg"></div>
+    <div class="section-container">
+        <div class="breadcrumb">
+            <a href="{{ url_for('home') }}">Home</a> ›
+            <a href="{{ url_for('cities') }}">Cities</a> ›
+            <span>{{ city.name }}</span>
+        </div>
+
+        <div class="city-hero-content">
+            <div class="city-hero-text">
+                <div class="city-province-tag">{{ city.province }}</div>
+                <h1 class="city-hero-title">
+                    {{ city.name }}
+                    <span class="city-hero-cn">{{ city.name_cn }}</span>
+                </h1>
+                <p class="city-hero-desc">{{ city.description }}</p>
+                <div class="city-hero-meta">
+                    <div class="meta-item">
+                        <span class="meta-label">Population</span>
+                        <span class="meta-value">{{ city.population }}</span>
+                    </div>
+                    <div class="meta-item">
+                        <span class="meta-label">Best Season</span>
+                        <span class="meta-value">{{ city.best_season }}</span>
+                    </div>
+                    <div class="meta-item">
+                        <span class="meta-label">Location</span>
+                        <span class="meta-value">{{ city.lat }}°N, {{ city.lon }}°E</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Current Weather Card -->
+            <div class="weather-current-card">
+                <div class="weather-card-label">Live Weather</div>
+                <div class="weather-main">
+                    <div class="weather-icon">{{ weather.icon }}</div>
+                    <div class="weather-temp">{{ weather.temperature }}°</div>
+                </div>
+                <div class="weather-condition">{{ weather.condition }}</div>
+                <div class="weather-feels">Feels like {{ weather.feels_like }}°C</div>
+                <div class="weather-details">
+                    <div class="weather-detail">
+                        <span class="detail-icon">💧</span>
+                        <span>{{ weather.humidity }}%</span>
+                    </div>
+                    <div class="weather-detail">
+                        <span class="detail-icon">💨</span>
+                        <span>{{ weather.wind_speed }} km/h</span>
+                    </div>
+                    <div class="weather-detail">
+                        <span class="detail-icon">🌡️</span>
+                        <span>{{ weather.pressure }} hPa</span>
+                    </div>
+                    <div class="weather-detail">
+                        <span class="detail-icon">☁️</span>
+                        <span>{{ weather.cloud_cover }}%</span>
+                    </div>
+                </div>
+                <div class="weather-source">Updated {{ weather.time }} · {{ weather.source }}</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Weather Alerts -->
+{% if alerts %}
+<section class="alerts-section">
+    <div class="section-container">
+        <h2 class="section-title-inline">⚠️ Weather Alerts & Reminders</h2>
+        <div class="alerts-grid">
+            {% for alert in alerts %}
+            <div class="alert-card alert-{{ alert.level }}">
+                <div class="alert-icon">{{ alert.icon }}</div>
+                <div class="alert-content">
+                    <div class="alert-title">{{ alert.title }}</div>
+                    <div class="alert-message">{{ alert.message }}</div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- 5-Day Forecast -->
+<section class="forecast-section">
+    <div class="section-container">
+        <h2 class="section-title-inline">📅 5-Day Forecast</h2>
+        <div class="forecast-grid">
+            {% for day in forecast %}
+            <div class="forecast-card">
+                <div class="forecast-day">{{ day.day_name }}</div>
+                <div class="forecast-date">{{ day.short_date }}</div>
+                <div class="forecast-icon">{{ day.icon }}</div>
+                <div class="forecast-condition">{{ day.condition }}</div>
+                <div class="forecast-temps">
+                    <span class="temp-max">{{ day.temp_max }}°</span>
+                    <span class="temp-min">{{ day.temp_min }}°</span>
+                </div>
+                <div class="forecast-extra">
+                    {% if day.precipitation > 0 %}
+                    <span>💧 {{ day.precipitation }}mm</span>
+                    {% endif %}
+                    <span>💨 {{ day.wind_max }}km/h</span>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- AI Recommendation Generator -->
+<section class="ai-section">
+    <div class="section-container">
+        <div class="ai-card">
+            <div class="ai-card-header">
+                <h2 class="ai-card-title">🤖 Get AI-Powered Travel Plan</h2>
+                <p class="ai-card-subtitle">Tell us your preferences and we'll generate a personalized itinerary based on the actual weather forecast.</p>
+            </div>
+
+            <div class="ai-form">
+                <div class="ai-form-row">
+                    <div class="form-field">
+                        <label>Travel Style</label>
+                        <select id="preference" class="form-select">
+                            <option value="general">General Sightseeing</option>
+                            <option value="food">Food & Cuisine Focus</option>
+                            <option value="culture">Culture & History</option>
+                            <option value="nature">Nature & Outdoors</option>
+                            <option value="photography">Photography</option>
+                            <option value="shopping">Shopping & Modern</option>
+                            <option value="family">Family-Friendly</option>
+                        </select>
+                    </div>
+                    <div class="form-field">
+                        <label>Budget</label>
+                        <select id="budget" class="form-select">
+                            <option value="low">Budget (Backpacker)</option>
+                            <option value="medium" selected>Medium (Comfort)</option>
+                            <option value="high">High (Luxury)</option>
+                        </select>
+                    </div>
+                    <div class="form-field">
+                        <label>Duration</label>
+                        <select id="duration" class="form-select">
+                            <option value="1 day">1 Day</option>
+                            <option value="2 days">2 Days</option>
+                            <option value="3 days" selected>3 Days</option>
+                            <option value="5 days">5 Days</option>
+                            <option value="7 days">1 Week</option>
+                        </select>
+                    </div>
+                </div>
+                <button id="generateBtn" class="ai-generate-btn" data-city="{{ city.name }}">
+                    ✨ Generate AI Recommendation
+                </button>
+            </div>
+
+            <div id="aiResult" class="ai-result" style="display:none;">
+                <div id="aiLoading" class="ai-loading" style="display:none;">
+                    <div class="loading-spinner"></div>
+                    <div>Generating your personalized travel plan...</div>
+                </div>
+                <div id="aiContent" class="ai-content"></div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- City Info Tabs -->
+<section class="info-section">
+    <div class="section-container">
+        <div class="info-grid">
+            <div class="info-card">
+                <h3 class="info-card-title">🏯 Top Attractions</h3>
+                <ul class="info-list">
+                    {% for h in city.highlights %}
+                    <li>{{ h }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <div class="info-card">
+                <h3 class="info-card-title">🍜 Must-Try Cuisine</h3>
+                <ul class="info-list">
+                    {% for c in city.cuisine %}
+                    <li>{{ c }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{{ url_for('static', filename='js/city.js') }}"></script>
+{% endblock %}

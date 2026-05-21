@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block title %}About — SinoVista{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <div class="section-container">
+        <h1 class="page-title">About SinoVista</h1>
+        <p class="page-subtitle">华境 · A Beautiful View of China</p>
+    </div>
+</section>
+
+<section class="about-section">
+    <div class="section-container about-container">
+        <div class="about-card">
+            <h2>🎯 Project Mission</h2>
+            <p>SinoVista is an AI-powered web platform that helps travelers explore Chinese cities through real-time weather intelligence, personalized recommendations, and smart safety alerts. The name combines <em>"Sino"</em> (referring to China) with <em>"Vista"</em> (a beautiful view), reflecting our goal: to give every traveler a clear, beautiful view into China's diverse cities.</p>
+        </div>
+
+        <div class="about-card">
+            <h2>🏗️ System Architecture</h2>
+            <p>SinoVista follows a clean three-layer Object-Oriented architecture:</p>
+            <ul class="about-list">
+                <li><strong>Presentation Layer:</strong> Flask web framework with Jinja2 templates, custom CSS, and vanilla JavaScript for interactivity.</li>
+                <li><strong>Business Logic Layer:</strong> Four core OOP classes — <code>CityManager</code> (data management), <code>WeatherService</code> (API integration), <code>AIRecommender</code> (AI logic), <code>WeatherAlertSystem</code> (rule-based reasoning).</li>
+                <li><strong>Data Layer:</strong> JSON city database + real-time Open-Meteo Weather API + LLM API (optional).</li>
+            </ul>
+        </div>
+
+        <div class="about-card">
+            <h2>🧠 AI Features</h2>
+            <ul class="about-list">
+                <li><strong>Smart Recommendations:</strong> AI analyzes the 5-day weather forecast and your preferences to build a custom itinerary.</li>
+                <li><strong>Weather-Aware Planning:</strong> Outdoor activities for sunny days, indoor alternatives for rainy ones.</li>
+                <li><strong>Intelligent Packing Lists:</strong> Generated based on actual forecast temperatures and precipitation.</li>
+                <li><strong>Conversational Chat:</strong> Ask any travel question in natural language.</li>
+                <li><strong>Automatic Alerts:</strong> Rule-based AI scans weather for storms, extreme temperatures, wind, fog, and more.</li>
+            </ul>
+        </div>
+
+        <div class="about-card">
+            <h2>⚙️ Technologies Used</h2>
+            <div class="tech-grid">
+                <div class="tech-item">Python 3</div>
+                <div class="tech-item">Flask</div>
+                <div class="tech-item">Open-Meteo API</div>
+                <div class="tech-item">LLM (DeepSeek/OpenAI)</div>
+                <div class="tech-item">Jinja2</div>
+                <div class="tech-item">JSON</div>
+                <div class="tech-item">REST APIs</div>
+                <div class="tech-item">Object-Oriented Design</div>
+                <div class="tech-item">Prompt Engineering</div>
+                <div class="tech-item">HTML5 / CSS3</div>
+                <div class="tech-item">Vanilla JavaScript</div>
+                <div class="tech-item">Responsive Design</div>
+            </div>
+        </div>
+
+        <div class="about-card">
+            <h2>📚 Course Information</h2>
+            <p><strong>Course:</strong> Object-Oriented Technology</p>
+            <p><strong>Project Type:</strong> Final Course Project</p>
+            <p>This project demonstrates core OOP principles: encapsulation, abstraction, inheritance (through Flask's class system), polymorphism (multiple AI providers behind one interface), and the Strategy pattern (LLM vs template fallback).</p>
+        </div>
+    </div>
+</section>
+{% endblock %}

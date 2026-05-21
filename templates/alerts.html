@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block title %}Weather Alerts — SinoVista{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <div class="section-container">
+        <h1 class="page-title">⚠️ Weather Alerts</h1>
+        <p class="page-subtitle">Live warnings and reminders across major Chinese cities</p>
+    </div>
+</section>
+
+<section class="alerts-page-section">
+    <div class="section-container">
+        {% if alerts %}
+        <div class="alerts-page-grid">
+            {% for alert in alerts %}
+            <div class="alert-card alert-{{ alert.level }}">
+                <div class="alert-icon">{{ alert.icon }}</div>
+                <div class="alert-content">
+                    <div class="alert-city-tag">
+                        <a href="{{ url_for('city_detail', city_name=alert.city) }}">
+                            {{ alert.city }} · {{ alert.city_cn }}
+                        </a>
+                    </div>
+                    <div class="alert-title">{{ alert.title }}</div>
+                    <div class="alert-message">{{ alert.message }}</div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <div class="empty-icon">☀️</div>
+            <h3>All Clear!</h3>
+            <p>No weather warnings across major Chinese cities right now. Great time to travel!</p>
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}
