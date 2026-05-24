@@ -1,7 +1,18 @@
 // ============================================================
-// SinoVista - Main JavaScript
-// Handles: search autocomplete, AI chat, mobile menu
+// SinoVista v2 - Main JavaScript
+// Made by amfa7im
 // ============================================================
+
+// Hide page loader after content loads
+window.addEventListener('load', () => {
+    const loader = document.getElementById('pageLoader');
+    if (loader) {
+        setTimeout(() => {
+            loader.classList.add('hidden');
+            setTimeout(() => loader.remove(), 500);
+        }, 400);
+    }
+});
 
 document.addEventListener('DOMContentLoaded', function() {
 
@@ -36,12 +47,11 @@ document.addEventListener('DOMContentLoaded', function() {
                             searchSuggestions.innerHTML = data.cities.map(c => `
                                 <div class="search-suggestion-item" data-city="${c.name}">
                                     ${c.name} <span class="search-suggestion-cn">${c.name_cn}</span>
-                                    <span style="float:right; color:#999; font-size:13px;">${c.province}</span>
+                                    <span style="float:right; color:var(--text-muted); font-size:13px;">${c.province}</span>
                                 </div>
                             `).join('');
                             searchSuggestions.classList.add('show');
 
-                            // Click handler for suggestions
                             document.querySelectorAll('.search-suggestion-item').forEach(item => {
                                 item.addEventListener('click', () => {
                                     window.location.href = `/city/${encodeURIComponent(item.dataset.city)}`;
@@ -63,7 +73,6 @@ document.addEventListener('DOMContentLoaded', function() {
             if (e.key === 'Enter') heroSearchBtn.click();
         });
 
-        // Close suggestions on outside click
         document.addEventListener('click', e => {
             if (!e.target.closest('.hero-search')) {
                 searchSuggestions.classList.remove('show');
@@ -90,7 +99,6 @@ document.addEventListener('DOMContentLoaded', function() {
             const message = chatInput.value.trim();
             if (!message) return;
 
-            // Add user message
             const userMsg = document.createElement('div');
             userMsg.className = 'chat-msg user-msg';
             userMsg.textContent = message;
@@ -99,14 +107,12 @@ document.addEventListener('DOMContentLoaded', function() {
             chatInput.value = '';
             chatMessages.scrollTop = chatMessages.scrollHeight;
 
-            // Show typing
             const typingMsg = document.createElement('div');
             typingMsg.className = 'chat-msg ai-msg';
             typingMsg.innerHTML = '<em>thinking...</em>';
             chatMessages.appendChild(typingMsg);
             chatMessages.scrollTop = chatMessages.scrollHeight;
 
-            // Get current city if on city page
             const cityElement = document.querySelector('[data-city]');
             const cityName = cityElement ? cityElement.dataset.city : null;
 
@@ -132,7 +138,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-// Format chat response (handle bold, basic markdown)
 function formatChatResponse(text) {
     return text
         .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')

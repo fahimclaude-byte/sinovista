@@ -5,20 +5,36 @@
 {% block content %}
 <section class="page-header">
     <div class="section-container">
-        <h1 class="page-title">About SinoVista</h1>
+        <h1 class="page-title" data-i18n="nav_about">About SinoVista</h1>
         <p class="page-subtitle">华境 · A Beautiful View of China</p>
     </div>
 </section>
 
 <section class="about-section">
     <div class="section-container about-container">
+
+        <!-- Creator Profile Card -->
+        <div class="creator-card">
+            <div class="creator-avatar">A</div>
+            <div class="creator-name">amfa7im</div>
+            <div class="creator-role">Full Stack Developer</div>
+            <p class="creator-bio">
+                A passionate Bangladeshi student studying Object-Oriented Technology in China. SinoVista is the result of combining my love for software engineering with the beauty of Chinese culture. Built with Python, Flask, and AI — designed for travelers, by a traveler.
+            </p>
+            <div class="creator-links">
+                <a href="https://github.com/fahimclaude-byte" target="_blank" class="creator-link">🔗 GitHub</a>
+                <a href="mailto:amfa7im@example.com" class="creator-link">📧 Contact</a>
+                <a href="https://sinovista.onrender.com" target="_blank" class="creator-link">🌐 Live Demo</a>
+            </div>
+        </div>
+
         <div class="about-card">
-            <h2>🎯 Project Mission</h2>
+            <h2>🎯 <span data-i18n="about_mission_title">Project Mission</span></h2>
             <p>SinoVista is an AI-powered web platform that helps travelers explore Chinese cities through real-time weather intelligence, personalized recommendations, and smart safety alerts. The name combines <em>"Sino"</em> (referring to China) with <em>"Vista"</em> (a beautiful view), reflecting our goal: to give every traveler a clear, beautiful view into China's diverse cities.</p>
         </div>
 
         <div class="about-card">
-            <h2>🏗️ System Architecture</h2>
+            <h2>🏗️ <span data-i18n="about_arch_title">System Architecture</span></h2>
             <p>SinoVista follows a clean three-layer Object-Oriented architecture:</p>
             <ul class="about-list">
                 <li><strong>Presentation Layer:</strong> Flask web framework with Jinja2 templates, custom CSS, and vanilla JavaScript for interactivity.</li>
@@ -28,18 +44,20 @@
         </div>
 
         <div class="about-card">
-            <h2>🧠 AI Features</h2>
+            <h2>🧠 <span data-i18n="about_features_title">AI Features</span></h2>
             <ul class="about-list">
                 <li><strong>Smart Recommendations:</strong> AI analyzes the 5-day weather forecast and your preferences to build a custom itinerary.</li>
                 <li><strong>Weather-Aware Planning:</strong> Outdoor activities for sunny days, indoor alternatives for rainy ones.</li>
                 <li><strong>Intelligent Packing Lists:</strong> Generated based on actual forecast temperatures and precipitation.</li>
                 <li><strong>Conversational Chat:</strong> Ask any travel question in natural language.</li>
                 <li><strong>Automatic Alerts:</strong> Rule-based AI scans weather for storms, extreme temperatures, wind, fog, and more.</li>
+                <li><strong>Multilingual Support:</strong> Available in English, বাংলা (Bengali), and 中文 (Chinese).</li>
+                <li><strong>Dark/Light Theme:</strong> Adaptive UI for comfortable viewing day or night.</li>
             </ul>
         </div>
 
         <div class="about-card">
-            <h2>⚙️ Technologies Used</h2>
+            <h2>⚙️ <span data-i18n="about_tech_title">Technologies Used</span></h2>
             <div class="tech-grid">
                 <div class="tech-item">Python 3</div>
                 <div class="tech-item">Flask</div>
@@ -53,6 +71,10 @@
                 <div class="tech-item">HTML5 / CSS3</div>
                 <div class="tech-item">Vanilla JavaScript</div>
                 <div class="tech-item">Responsive Design</div>
+                <div class="tech-item">i18n (3 languages)</div>
+                <div class="tech-item">Dark Mode</div>
+                <div class="tech-item">GitHub</div>
+                <div class="tech-item">Render Deployment</div>
             </div>
         </div>
 
@@ -60,6 +82,7 @@
             <h2>📚 Course Information</h2>
             <p><strong>Course:</strong> Object-Oriented Technology</p>
             <p><strong>Project Type:</strong> Final Course Project</p>
+            <p><strong>Developer:</strong> amfa7im</p>
             <p>This project demonstrates core OOP principles: encapsulation, abstraction, inheritance (through Flask's class system), polymorphism (multiple AI providers behind one interface), and the Strategy pattern (LLM vs template fallback).</p>
         </div>
     </div>

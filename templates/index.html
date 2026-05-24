@@ -9,34 +9,36 @@
         <div class="hero-pattern"></div>
     </div>
     <div class="hero-content">
-        <div class="hero-tagline">华境 · A Beautiful View of China</div>
+        <div class="hero-tagline" data-i18n="hero_tagline">华境 · A Beautiful View of China</div>
         <h1 class="hero-title">
-            <span class="hero-line-1">Discover</span>
-            <span class="hero-line-2">China</span>
-            <span class="hero-line-3">with AI</span>
+            <span class="hero-line-1" data-i18n="hero_line_1">Discover</span>
+            <span class="hero-line-2" data-i18n="hero_line_2">China</span>
+            <span class="hero-line-3" data-i18n="hero_line_3">with AI</span>
         </h1>
         <p class="hero-description">
-            Real-time weather across <strong>{{ total_cities }} cities</strong> in
-            <strong>{{ provinces|length }} provinces</strong>, intelligent travel recommendations,
-            and instant weather alerts — all powered by AI.
+            <span data-i18n="hero_description_pre">Real-time weather across</span>
+            <strong>{{ total_cities }} <span data-i18n="hero_cities">cities</span></strong>
+            <span data-i18n="hero_description_mid">in</span>
+            <strong>{{ provinces|length }} <span data-i18n="hero_provinces">provinces</span></strong>,
+            <span data-i18n="hero_description_post">intelligent travel recommendations, and instant weather alerts — all powered by AI.</span>
         </p>
         <div class="hero-search">
-            <input type="text" id="heroSearch" placeholder="Search any Chinese city (e.g., Beijing, 上海, Chengdu...)" class="hero-input">
-            <button id="heroSearchBtn" class="hero-btn">Explore →</button>
+            <input type="text" id="heroSearch" data-i18n-placeholder="hero_search_placeholder" placeholder="Search any Chinese city (e.g., Beijing, 上海, Chengdu...)" class="hero-input">
+            <button id="heroSearchBtn" class="hero-btn"><span data-i18n="hero_explore_btn">Explore</span> →</button>
             <div id="searchSuggestions" class="search-suggestions"></div>
         </div>
         <div class="hero-stats">
             <div class="stat">
                 <div class="stat-number">{{ total_cities }}</div>
-                <div class="stat-label">Cities</div>
+                <div class="stat-label" data-i18n="stat_cities">Cities</div>
             </div>
             <div class="stat">
                 <div class="stat-number">{{ provinces|length }}</div>
-                <div class="stat-label">Provinces</div>
+                <div class="stat-label" data-i18n="stat_provinces">Provinces</div>
             </div>
             <div class="stat">
                 <div class="stat-number">∞</div>
-                <div class="stat-label">AI Insights</div>
+                <div class="stat-label" data-i18n="stat_ai">AI Insights</div>
             </div>
         </div>
     </div>
@@ -46,9 +48,9 @@
 <section class="featured-section">
     <div class="section-container">
         <div class="section-header">
-            <span class="section-eyebrow">Featured Destinations</span>
-            <h2 class="section-title">Most Popular Cities</h2>
-            <p class="section-subtitle">Hand-picked cities that showcase the best of China</p>
+            <span class="section-eyebrow" data-i18n="featured_eyebrow">Featured Destinations</span>
+            <h2 class="section-title" data-i18n="featured_title">Most Popular Cities</h2>
+            <p class="section-subtitle" data-i18n="featured_subtitle">Hand-picked cities that showcase the best of China</p>
         </div>
         <div class="cities-grid">
             {% for city in featured_cities %}
@@ -61,23 +63,15 @@
                     <div class="city-province">{{ city.province }} · {{ city.population }}</div>
                     <p class="city-description">{{ city.description }}</p>
                     <div class="city-meta">
-                        <span class="city-season">📅 Best: {{ city.best_season }}</span>
+                        <span class="city-season"><span data-i18n="best_season">Best:</span> {{ city.best_season }}</span>
                         <span class="city-arrow">→</span>
-                    </div>
-                </div>
-                <div class="city-card-hover">
-                    <div class="hover-highlights">
-                        <strong>Top sights:</strong>
-                        {% for h in city.highlights[:3] %}
-                            <span>{{ h }}{% if not loop.last %},{% endif %}</span>
-                        {% endfor %}
                     </div>
                 </div>
             </a>
             {% endfor %}
         </div>
         <div class="view-all-wrapper">
-            <a href="{{ url_for('cities') }}" class="view-all-btn">View All {{ total_cities }} Cities →</a>
+            <a href="{{ url_for('cities') }}" class="view-all-btn"><span data-i18n="view_all">View All</span> {{ total_cities }} <span data-i18n="view_all_cities">Cities</span> →</a>
         </div>
     </div>
 </section>
@@ -86,39 +80,39 @@
 <section class="features-section">
     <div class="section-container">
         <div class="section-header">
-            <span class="section-eyebrow">What You Get</span>
-            <h2 class="section-title">Powered by Intelligence</h2>
+            <span class="section-eyebrow" data-i18n="features_eyebrow">What You Get</span>
+            <h2 class="section-title" data-i18n="features_title">Powered by Intelligence</h2>
         </div>
         <div class="features-grid">
             <div class="feature-card">
                 <div class="feature-icon">🌡️</div>
-                <h3 class="feature-title">Real-Time Weather</h3>
-                <p class="feature-desc">Live weather data, 5-day forecasts, humidity, wind, and pressure for every Chinese city.</p>
+                <h3 class="feature-title" data-i18n="feature_weather_title">Real-Time Weather</h3>
+                <p class="feature-desc" data-i18n="feature_weather_desc">Live weather data, 5-day forecasts, humidity, wind, and pressure for every Chinese city.</p>
             </div>
             <div class="feature-card">
                 <div class="feature-icon">🤖</div>
-                <h3 class="feature-title">AI Recommendations</h3>
-                <p class="feature-desc">Personalized itineraries based on your preferences, budget, and the actual weather forecast.</p>
+                <h3 class="feature-title" data-i18n="feature_ai_title">AI Recommendations</h3>
+                <p class="feature-desc" data-i18n="feature_ai_desc">Personalized itineraries based on your preferences, budget, and the actual weather forecast.</p>
             </div>
             <div class="feature-card">
                 <div class="feature-icon">⚠️</div>
-                <h3 class="feature-title">Smart Alerts</h3>
-                <p class="feature-desc">Automatic warnings for storms, extreme temperatures, heavy rain, fog, and dangerous winds.</p>
+                <h3 class="feature-title" data-i18n="feature_alerts_title">Smart Alerts</h3>
+                <p class="feature-desc" data-i18n="feature_alerts_desc">Automatic warnings for storms, extreme temperatures, heavy rain, fog, and dangerous winds.</p>
             </div>
             <div class="feature-card">
                 <div class="feature-icon">💬</div>
-                <h3 class="feature-title">AI Chat Assistant</h3>
-                <p class="feature-desc">Ask anything in natural language — food tips, packing advice, cultural insights.</p>
+                <h3 class="feature-title" data-i18n="feature_chat_title">AI Chat Assistant</h3>
+                <p class="feature-desc" data-i18n="feature_chat_desc">Ask anything in natural language — food tips, packing advice, cultural insights.</p>
             </div>
             <div class="feature-card">
                 <div class="feature-icon">🍜</div>
-                <h3 class="feature-title">Local Cuisine Guide</h3>
-                <p class="feature-desc">Discover must-try dishes specific to each city, curated by AI based on your location.</p>
+                <h3 class="feature-title" data-i18n="feature_food_title">Local Cuisine Guide</h3>
+                <p class="feature-desc" data-i18n="feature_food_desc">Discover must-try dishes specific to each city, curated by AI based on your location.</p>
             </div>
             <div class="feature-card">
                 <div class="feature-icon">🏯</div>
-                <h3 class="feature-title">Cultural Highlights</h3>
-                <p class="feature-desc">Top attractions and hidden gems for every city, from imperial palaces to scenic mountains.</p>
+                <h3 class="feature-title" data-i18n="feature_culture_title">Cultural Highlights</h3>
+                <p class="feature-desc" data-i18n="feature_culture_desc">Top attractions and hidden gems for every city, from imperial palaces to scenic mountains.</p>
             </div>
         </div>
     </div>
@@ -127,9 +121,9 @@
 <!-- CTA Section -->
 <section class="cta-section">
     <div class="cta-container">
-        <h2 class="cta-title">Ready to plan your China adventure?</h2>
-        <p class="cta-text">Pick a city and get instant AI-powered insights tailored to today's weather.</p>
-        <a href="{{ url_for('cities') }}" class="cta-btn">Start Exploring</a>
+        <h2 class="cta-title" data-i18n="cta_title">Ready to plan your China adventure?</h2>
+        <p class="cta-text" data-i18n="cta_text">Pick a city and get instant AI-powered insights tailored to today's weather.</p>
+        <a href="{{ url_for('cities') }}" class="cta-btn" data-i18n="cta_btn">Start Exploring</a>
     </div>
 </section>
 {% endblock %}

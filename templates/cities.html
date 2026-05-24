@@ -5,10 +5,9 @@
 {% block content %}
 <section class="page-header">
     <div class="section-container">
-        <h1 class="page-title">Explore Chinese Cities</h1>
+        <h1 class="page-title" data-i18n="nav_cities">Explore Chinese Cities</h1>
         <p class="page-subtitle">{{ cities|length }} cities across {{ provinces|length }} provinces</p>
 
-        <!-- Filter bar -->
         <div class="filter-bar">
             <form method="GET" class="filter-form">
                 <input type="text" name="search" value="{{ search_query }}" placeholder="🔍 Search cities..." class="filter-input">
