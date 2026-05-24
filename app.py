@@ -105,6 +105,33 @@ def about():
     return render_template('about.html')
 
 
+@app.route('/map')
+def map_page():
+    """Interactive China Map page."""
+    cities = city_manager.get_all_cities()
+    return render_template('map.html', cities=cities)
+
+
+@app.route('/compare')
+def compare_page():
+    """Weather comparison page for multiple cities."""
+    cities = city_manager.get_all_cities()
+    return render_template('compare.html', cities=cities)
+
+
+@app.route('/quiz')
+def quiz_page():
+    """China Knowledge Quiz Game."""
+    return render_template('quiz.html')
+
+
+@app.route('/favorites')
+def favorites_page():
+    """Favorites page (uses localStorage on frontend)."""
+    cities = city_manager.get_all_cities()
+    return render_template('favorites.html', cities=cities)
+
+
 # ============================================================
 # API ENDPOINTS - For AJAX calls
 # ============================================================
@@ -173,6 +200,34 @@ def api_search_cities():
     query = request.args.get('q', '')
     results = city_manager.search_cities(query)[:10]
     return jsonify({'cities': results})
+
+
+@app.route('/api/compare', methods=['POST'])
+def api_compare():
+    """Compare weather of multiple cities."""
+    data = request.get_json()
+    city_names = data.get('cities', [])
+
+    results = []
+    for name in city_names[:4]:  # Max 4 cities
+        city = city_manager.get_city(name)
+        if city:
+            weather = weather_service.get_current_weather(city)
+            forecast = weather_service.get_forecast(city, days=5)
+            results.append({
+                'city': city,
+                'weather': weather,
+                'forecast': forecast
+            })
+
+    return jsonify({'comparisons': results})
+
+
+@app.route('/api/cities/all')
+def api_all_cities():
+    """Get all cities (for map and other features)."""
+    cities = city_manager.get_all_cities()
+    return jsonify({'cities': cities})
 
 
 # ============================================================

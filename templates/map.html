@@ -1,0 +1,275 @@
+{% extends "base.html" %}
+
+{% block title %}Interactive China Map — SinoVista{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <div class="section-container">
+        <h1 class="page-title">🗺️ Interactive China Map</h1>
+        <p class="page-subtitle">Click any city marker to explore weather, AI recommendations, and travel insights</p>
+    </div>
+</section>
+
+<section class="map-section">
+    <div class="section-container">
+        <div class="map-controls">
+            <div class="map-control-item">
+                <span class="map-stat-num">{{ cities|length }}</span>
+                <span class="map-stat-label">Cities Mapped</span>
+            </div>
+            <div class="map-control-item">
+                <input type="text" id="mapSearch" placeholder="🔍 Quick search city..." class="map-search-input">
+            </div>
+            <div class="map-control-item">
+                <span class="map-legend">
+                    <span class="legend-dot legend-major"></span> Major City
+                    <span class="legend-dot legend-regular" style="margin-left: 16px;"></span> Regular City
+                </span>
+            </div>
+        </div>
+
+        <div class="map-wrapper">
+            <div class="map-container" id="mapContainer">
+                <svg id="chinaMap" viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
+                    <!-- China outline (simplified) -->
+                    <defs>
+                        <linearGradient id="chinaGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#FDF8F0;stop-opacity:1" />
+                            <stop offset="100%" style="stop-color:#F0E5D3;stop-opacity:1" />
+                        </linearGradient>
+                        <filter id="markerShadow" x="-50%" y="-50%" width="200%" height="200%">
+                            <feGaussianBlur in="SourceAlpha" stdDeviation="2"/>
+                            <feOffset dx="0" dy="2" result="offsetblur"/>
+                            <feFlood flood-color="#C8102E" flood-opacity="0.4"/>
+                            <feComposite in2="offsetblur" operator="in"/>
+                            <feMerge>
+                                <feMergeNode/>
+                                <feMergeNode in="SourceGraphic"/>
+                            </feMerge>
+                        </filter>
+                    </defs>
+
+                    <!-- China territory simplified shape -->
+                    <path id="chinaShape" d="M 180 180
+                        L 240 140
+                        L 320 120
+                        L 420 100
+                        L 520 110
+                        L 620 130
+                        L 700 160
+                        L 740 200
+                        L 760 260
+                        L 750 320
+                        L 720 380
+                        L 690 430
+                        L 640 470
+                        L 580 490
+                        L 520 500
+                        L 450 510
+                        L 380 505
+                        L 310 490
+                        L 250 460
+                        L 200 420
+                        L 160 370
+                        L 140 310
+                        L 145 250
+                        L 165 210
+                        Z"
+                        fill="url(#chinaGradient)"
+                        stroke="#C8102E"
+                        stroke-width="2"
+                        opacity="0.8"/>
+
+                    <!-- Compass -->
+                    <g transform="translate(720, 50)">
+                        <circle cx="0" cy="0" r="25" fill="white" stroke="#C8102E" stroke-width="2"/>
+                        <text x="0" y="-12" text-anchor="middle" font-size="10" fill="#C8102E" font-weight="bold">N</text>
+                        <text x="0" y="20" text-anchor="middle" font-size="10" fill="#666">S</text>
+                        <text x="-16" y="4" text-anchor="middle" font-size="10" fill="#666">W</text>
+                        <text x="16" y="4" text-anchor="middle" font-size="10" fill="#666">E</text>
+                        <polygon points="0,-5 -3,5 0,3 3,5" fill="#C8102E"/>
+                    </g>
+
+                    <!-- Title -->
+                    <text x="400" y="40" text-anchor="middle" font-family="Cormorant Garamond" font-size="28" font-weight="700" fill="#C8102E">中国 China</text>
+                    <text x="400" y="60" text-anchor="middle" font-size="11" fill="#666" letter-spacing="3">EXPLORE CITIES</text>
+
+                    <!-- City markers will be added by JavaScript -->
+                    <g id="cityMarkers"></g>
+                </svg>
+            </div>
+
+            <!-- City info popup -->
+            <div class="city-popup" id="cityPopup">
+                <button class="popup-close" onclick="closePopup()">×</button>
+                <div class="popup-content" id="popupContent">
+                    <h3>Hover over a city marker</h3>
+                    <p>Click any red dot on the map to see city information and explore further!</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="map-cities-list">
+            <h3 class="cities-list-title">🌟 Quick Navigation</h3>
+            <div class="cities-quick-grid" id="citiesQuickGrid">
+                <!-- Populated by JavaScript -->
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+// City coordinates mapped to SVG viewBox (800x600)
+// Real geographic coordinates of China: lat 18-53, lon 73-135
+// We'll project them to the SVG space
+const cities = {{ cities|tojson }};
+
+// Geographic bounds of China (simplified)
+const CHINA_BOUNDS = {
+    minLat: 18,  maxLat: 53,
+    minLon: 73,  maxLon: 135
+};
+
+// SVG bounds (where China shape is drawn)
+const SVG_BOUNDS = {
+    minX: 150, maxX: 740,
+    minY: 110, maxY: 500
+};
+
+function projectCoords(lat, lon) {
+    const x = SVG_BOUNDS.minX + ((lon - CHINA_BOUNDS.minLon) / (CHINA_BOUNDS.maxLon - CHINA_BOUNDS.minLon)) * (SVG_BOUNDS.maxX - SVG_BOUNDS.minX);
+    const y = SVG_BOUNDS.maxY - ((lat - CHINA_BOUNDS.minLat) / (CHINA_BOUNDS.maxLat - CHINA_BOUNDS.minLat)) * (SVG_BOUNDS.maxY - SVG_BOUNDS.minY);
+    return { x, y };
+}
+
+// Major cities (slightly bigger markers)
+const majorCities = ['Beijing', 'Shanghai', 'Guangzhou', 'Shenzhen', 'Chengdu', 'Hangzhou', 'Xi\'an', 'Chongqing', "Xi'an"];
+
+function renderMarkers() {
+    const markersGroup = document.getElementById('cityMarkers');
+    markersGroup.innerHTML = '';
+
+    cities.forEach(city => {
+        const { x, y } = projectCoords(city.lat, city.lon);
+        const isMajor = majorCities.includes(city.name);
+        const radius = isMajor ? 6 : 4;
+        const color = isMajor ? '#C8102E' : '#E63946';
+
+        const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        g.setAttribute('class', 'city-marker');
+        g.setAttribute('transform', `translate(${x}, ${y})`);
+        g.style.cursor = 'pointer';
+        g.dataset.city = city.name;
+
+        // Pulse ring (only for major)
+        if (isMajor) {
+            const pulse = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+            pulse.setAttribute('r', radius);
+            pulse.setAttribute('fill', color);
+            pulse.setAttribute('opacity', '0.3');
+            pulse.setAttribute('class', 'pulse-ring');
+            g.appendChild(pulse);
+        }
+
+        // Main marker
+        const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        circle.setAttribute('r', radius);
+        circle.setAttribute('fill', color);
+        circle.setAttribute('stroke', 'white');
+        circle.setAttribute('stroke-width', '2');
+        circle.setAttribute('filter', 'url(#markerShadow)');
+        g.appendChild(circle);
+
+        // Label (for major cities)
+        if (isMajor) {
+            const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            label.setAttribute('y', '-12');
+            label.setAttribute('text-anchor', 'middle');
+            label.setAttribute('font-size', '11');
+            label.setAttribute('font-weight', '600');
+            label.setAttribute('fill', '#1A1A1A');
+            label.setAttribute('class', 'city-label');
+            label.textContent = city.name;
+            g.appendChild(label);
+        }
+
+        g.addEventListener('click', (e) => {
+            e.stopPropagation();
+            showCityInfo(city);
+        });
+
+        g.addEventListener('mouseenter', () => {
+            circle.setAttribute('r', radius + 2);
+        });
+
+        g.addEventListener('mouseleave', () => {
+            circle.setAttribute('r', radius);
+        });
+
+        markersGroup.appendChild(g);
+    });
+}
+
+function showCityInfo(city) {
+    const popup = document.getElementById('cityPopup');
+    const content = document.getElementById('popupContent');
+
+    content.innerHTML = `
+        <div class="popup-province">${city.province}</div>
+        <h3 class="popup-city-name">${city.name} <span class="popup-cn">${city.name_cn}</span></h3>
+        <p class="popup-desc">${city.description.substring(0, 150)}...</p>
+        <div class="popup-meta">
+            <div><strong>👥 Population:</strong> ${city.population}</div>
+            <div><strong>📅 Best Season:</strong> ${city.best_season}</div>
+            <div><strong>📍 Coords:</strong> ${city.lat}°N, ${city.lon}°E</div>
+        </div>
+        <a href="/city/${encodeURIComponent(city.name)}" class="popup-btn">
+            🌤️ View Weather & Travel Info →
+        </a>
+    `;
+
+    popup.classList.add('open');
+}
+
+function closePopup() {
+    document.getElementById('cityPopup').classList.remove('open');
+}
+
+function renderQuickGrid() {
+    const grid = document.getElementById('citiesQuickGrid');
+    grid.innerHTML = cities.map(city => `
+        <a href="/city/${encodeURIComponent(city.name)}" class="quick-city-card">
+            <div class="quick-city-name">${city.name}</div>
+            <div class="quick-city-cn">${city.name_cn}</div>
+            <div class="quick-city-province">${city.province}</div>
+        </a>
+    `).join('');
+}
+
+// Search functionality
+document.getElementById('mapSearch').addEventListener('input', (e) => {
+    const query = e.target.value.toLowerCase();
+    const markers = document.querySelectorAll('.city-marker');
+
+    markers.forEach(marker => {
+        const cityName = marker.dataset.city.toLowerCase();
+        if (cityName.includes(query)) {
+            marker.style.opacity = '1';
+            marker.style.transform = marker.getAttribute('transform') + ' scale(1.3)';
+        } else if (query) {
+            marker.style.opacity = '0.2';
+        } else {
+            marker.style.opacity = '1';
+        }
+    });
+});
+
+// Initialize
+document.addEventListener('DOMContentLoaded', () => {
+    renderMarkers();
+    renderQuickGrid();
+});
+</script>
+{% endblock %}

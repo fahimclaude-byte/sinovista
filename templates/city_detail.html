@@ -18,6 +18,9 @@
                 <h1 class="city-hero-title">
                     {{ city.name }}
                     <span class="city-hero-cn">{{ city.name_cn }}</span>
+                    <button class="city-fav-btn" id="cityFavBtn" data-city="{{ city.name }}" onclick="toggleCityFav('{{ city.name }}')" title="Add to favorites">
+                        ☆
+                    </button>
                 </h1>
                 <p class="city-hero-desc">{{ city.description }}</p>
                 <div class="city-hero-meta">

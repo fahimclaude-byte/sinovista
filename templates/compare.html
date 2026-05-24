@@ -1,0 +1,333 @@
+{% extends "base.html" %}
+
+{% block title %}Compare Cities — SinoVista{% endblock %}
+
+{% block extra_head %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <div class="section-container">
+        <h1 class="page-title">📊 Compare Cities</h1>
+        <p class="page-subtitle">Side-by-side weather and travel comparison for up to 3 Chinese cities</p>
+    </div>
+</section>
+
+<section class="compare-section">
+    <div class="section-container">
+        <!-- City Selectors -->
+        <div class="compare-selectors">
+            <div class="compare-selector">
+                <label>🏯 City 1</label>
+                <select id="city1" class="compare-select">
+                    <option value="">-- Select City --</option>
+                    {% for city in cities %}
+                    <option value="{{ city.name }}" {% if city.name == 'Beijing' %}selected{% endif %}>{{ city.name }} ({{ city.name_cn }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="vs-divider">VS</div>
+            <div class="compare-selector">
+                <label>🏯 City 2</label>
+                <select id="city2" class="compare-select">
+                    <option value="">-- Select City --</option>
+                    {% for city in cities %}
+                    <option value="{{ city.name }}" {% if city.name == 'Shanghai' %}selected{% endif %}>{{ city.name }} ({{ city.name_cn }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="vs-divider">VS</div>
+            <div class="compare-selector">
+                <label>🏯 City 3</label>
+                <select id="city3" class="compare-select">
+                    <option value="">-- Optional --</option>
+                    {% for city in cities %}
+                    <option value="{{ city.name }}" {% if city.name == 'Chengdu' %}selected{% endif %}>{{ city.name }} ({{ city.name_cn }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+
+        <div class="compare-action">
+            <button id="compareBtn" class="compare-btn">
+                ⚡ Compare Now
+            </button>
+        </div>
+
+        <div id="compareLoading" class="compare-loading" style="display:none;">
+            <div class="loading-spinner"></div>
+            <div>Fetching weather data and generating comparison...</div>
+        </div>
+
+        <div id="compareResults" class="compare-results" style="display:none;">
+
+            <!-- Quick Stats Cards -->
+            <div class="comparison-cards" id="cityCards"></div>
+
+            <!-- Temperature Chart -->
+            <div class="chart-card">
+                <h3 class="chart-title">🌡️ Temperature Comparison (Next 5 Days)</h3>
+                <div class="chart-container">
+                    <canvas id="tempChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Multi-metric Bar Chart -->
+            <div class="chart-card">
+                <h3 class="chart-title">💧 Current Weather Metrics</h3>
+                <div class="chart-container">
+                    <canvas id="metricsChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Comparison Table -->
+            <div class="chart-card">
+                <h3 class="chart-title">📋 Detailed Comparison Table</h3>
+                <div class="table-wrapper">
+                    <table class="comparison-table" id="compareTable"></table>
+                </div>
+            </div>
+
+            <!-- AI Verdict -->
+            <div class="verdict-card" id="verdictCard">
+                <h3 class="verdict-title">🏆 SinoVista AI Verdict</h3>
+                <div class="verdict-content" id="verdictContent"></div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+const COLORS = ['#C8102E', '#00A86B', '#D4AF37', '#2196F3'];
+const COLORS_LIGHT = ['rgba(200, 16, 46, 0.2)', 'rgba(0, 168, 107, 0.2)', 'rgba(212, 175, 55, 0.2)', 'rgba(33, 150, 243, 0.2)'];
+
+let tempChartInstance = null;
+let metricsChartInstance = null;
+
+document.getElementById('compareBtn').addEventListener('click', async () => {
+    const city1 = document.getElementById('city1').value;
+    const city2 = document.getElementById('city2').value;
+    const city3 = document.getElementById('city3').value;
+
+    const selected = [city1, city2, city3].filter(c => c);
+
+    if (selected.length < 2) {
+        alert('Please select at least 2 cities to compare!');
+        return;
+    }
+
+    document.getElementById('compareLoading').style.display = 'block';
+    document.getElementById('compareResults').style.display = 'none';
+
+    try {
+        const response = await fetch('/api/compare', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ cities: selected })
+        });
+
+        const data = await response.json();
+        renderComparison(data.comparisons);
+    } catch (err) {
+        alert('Error fetching data. Try again!');
+        console.error(err);
+    } finally {
+        document.getElementById('compareLoading').style.display = 'none';
+    }
+});
+
+function renderComparison(comparisons) {
+    if (!comparisons || comparisons.length < 2) return;
+
+    document.getElementById('compareResults').style.display = 'block';
+
+    renderCityCards(comparisons);
+    renderTempChart(comparisons);
+    renderMetricsChart(comparisons);
+    renderTable(comparisons);
+    renderVerdict(comparisons);
+}
+
+function renderCityCards(comparisons) {
+    const container = document.getElementById('cityCards');
+    container.innerHTML = comparisons.map((item, idx) => `
+        <div class="comparison-card" style="border-color: ${COLORS[idx]}">
+            <div class="comp-card-header">
+                <span class="comp-province">${item.city.province}</span>
+                <span class="comp-rank">#${idx + 1}</span>
+            </div>
+            <h3 class="comp-name">${item.city.name}</h3>
+            <div class="comp-cn">${item.city.name_cn}</div>
+            <div class="comp-weather">
+                <div class="comp-icon">${item.weather.icon}</div>
+                <div class="comp-temp">${item.weather.temperature}°C</div>
+            </div>
+            <div class="comp-condition">${item.weather.condition}</div>
+            <div class="comp-details">
+                <div>💧 ${item.weather.humidity}%</div>
+                <div>💨 ${item.weather.wind_speed} km/h</div>
+            </div>
+            <a href="/city/${encodeURIComponent(item.city.name)}" class="comp-link">View Details →</a>
+        </div>
+    `).join('');
+}
+
+function renderTempChart(comparisons) {
+    const ctx = document.getElementById('tempChart').getContext('2d');
+
+    if (tempChartInstance) tempChartInstance.destroy();
+
+    const labels = comparisons[0].forecast.map(f => f.day_name);
+
+    const datasets = comparisons.map((item, idx) => ({
+        label: `${item.city.name} (Max)`,
+        data: item.forecast.map(f => f.temp_max),
+        borderColor: COLORS[idx],
+        backgroundColor: COLORS_LIGHT[idx],
+        borderWidth: 3,
+        fill: false,
+        tension: 0.4,
+        pointRadius: 6,
+        pointHoverRadius: 8
+    }));
+
+    // Add min temp lines too
+    comparisons.forEach((item, idx) => {
+        datasets.push({
+            label: `${item.city.name} (Min)`,
+            data: item.forecast.map(f => f.temp_min),
+            borderColor: COLORS[idx],
+            backgroundColor: 'transparent',
+            borderWidth: 2,
+            borderDash: [5, 5],
+            fill: false,
+            tension: 0.4,
+            pointRadius: 4
+        });
+    });
+
+    tempChartInstance = new Chart(ctx, {
+        type: 'line',
+        data: { labels, datasets },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'top', labels: { font: { size: 13 } } },
+                title: { display: false }
+            },
+            scales: {
+                y: {
+                    title: { display: true, text: 'Temperature (°C)' },
+                    grid: { color: 'rgba(0,0,0,0.05)' }
+                },
+                x: {
+                    grid: { display: false }
+                }
+            }
+        }
+    });
+}
+
+function renderMetricsChart(comparisons) {
+    const ctx = document.getElementById('metricsChart').getContext('2d');
+
+    if (metricsChartInstance) metricsChartInstance.destroy();
+
+    const metrics = ['Temperature (°C)', 'Humidity (%)', 'Wind (km/h)', 'Cloud Cover (%)'];
+
+    const datasets = comparisons.map((item, idx) => ({
+        label: item.city.name,
+        data: [
+            item.weather.temperature,
+            item.weather.humidity,
+            item.weather.wind_speed,
+            item.weather.cloud_cover
+        ],
+        backgroundColor: COLORS[idx],
+        borderColor: COLORS[idx],
+        borderWidth: 2,
+        borderRadius: 8
+    }));
+
+    metricsChartInstance = new Chart(ctx, {
+        type: 'bar',
+        data: { labels: metrics, datasets },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { position: 'top' } },
+            scales: {
+                y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' } },
+                x: { grid: { display: false } }
+            }
+        }
+    });
+}
+
+function renderTable(comparisons) {
+    const table = document.getElementById('compareTable');
+    table.innerHTML = `
+        <thead>
+            <tr>
+                <th>Attribute</th>
+                ${comparisons.map(c => `<th>${c.city.name}</th>`).join('')}
+            </tr>
+        </thead>
+        <tbody>
+            <tr><td><strong>🏛️ Province</strong></td>${comparisons.map(c => `<td>${c.city.province}</td>`).join('')}</tr>
+            <tr><td><strong>👥 Population</strong></td>${comparisons.map(c => `<td>${c.city.population}</td>`).join('')}</tr>
+            <tr><td><strong>📅 Best Season</strong></td>${comparisons.map(c => `<td>${c.city.best_season}</td>`).join('')}</tr>
+            <tr><td><strong>🌡️ Temperature</strong></td>${comparisons.map(c => `<td>${c.weather.temperature}°C</td>`).join('')}</tr>
+            <tr><td><strong>☁️ Condition</strong></td>${comparisons.map(c => `<td>${c.weather.icon} ${c.weather.condition}</td>`).join('')}</tr>
+            <tr><td><strong>💧 Humidity</strong></td>${comparisons.map(c => `<td>${c.weather.humidity}%</td>`).join('')}</tr>
+            <tr><td><strong>💨 Wind Speed</strong></td>${comparisons.map(c => `<td>${c.weather.wind_speed} km/h</td>`).join('')}</tr>
+            <tr><td><strong>🌡️ Pressure</strong></td>${comparisons.map(c => `<td>${c.weather.pressure} hPa</td>`).join('')}</tr>
+            <tr><td><strong>🏛️ Top Sights</strong></td>${comparisons.map(c => `<td>${c.city.highlights.slice(0,3).join(', ')}</td>`).join('')}</tr>
+            <tr><td><strong>🍜 Famous Food</strong></td>${comparisons.map(c => `<td>${c.city.cuisine.slice(0,3).join(', ')}</td>`).join('')}</tr>
+        </tbody>
+    `;
+}
+
+function renderVerdict(comparisons) {
+    const content = document.getElementById('verdictContent');
+
+    // Find best in different categories
+    const warmest = comparisons.reduce((a, b) => a.weather.temperature > b.weather.temperature ? a : b);
+    const coolest = comparisons.reduce((a, b) => a.weather.temperature < b.weather.temperature ? a : b);
+    const driest = comparisons.reduce((a, b) => a.weather.humidity < b.weather.humidity ? a : b);
+    const calmest = comparisons.reduce((a, b) => a.weather.wind_speed < b.weather.wind_speed ? a : b);
+
+    let verdict = '<div class="verdict-grid">';
+    verdict += `<div class="verdict-item"><div class="verdict-icon">🔥</div><div class="verdict-label">Warmest</div><div class="verdict-value">${warmest.city.name}</div><div class="verdict-detail">${warmest.weather.temperature}°C</div></div>`;
+    verdict += `<div class="verdict-item"><div class="verdict-icon">❄️</div><div class="verdict-label">Coolest</div><div class="verdict-value">${coolest.city.name}</div><div class="verdict-detail">${coolest.weather.temperature}°C</div></div>`;
+    verdict += `<div class="verdict-item"><div class="verdict-icon">☀️</div><div class="verdict-label">Driest Air</div><div class="verdict-value">${driest.city.name}</div><div class="verdict-detail">${driest.weather.humidity}% humidity</div></div>`;
+    verdict += `<div class="verdict-item"><div class="verdict-icon">🌬️</div><div class="verdict-label">Calmest Winds</div><div class="verdict-value">${calmest.city.name}</div><div class="verdict-detail">${calmest.weather.wind_speed} km/h</div></div>`;
+    verdict += '</div>';
+
+    // Overall recommendation
+    const ranked = [...comparisons].sort((a, b) => {
+        // Score: ideal temp 18-25, low wind, moderate humidity
+        const scoreA = (Math.abs(22 - a.weather.temperature) * -2) + (50 - a.weather.wind_speed) + (Math.abs(60 - a.weather.humidity) * -0.5);
+        const scoreB = (Math.abs(22 - b.weather.temperature) * -2) + (50 - b.weather.wind_speed) + (Math.abs(60 - b.weather.humidity) * -0.5);
+        return scoreB - scoreA;
+    });
+
+    verdict += `<div class="verdict-recommendation">
+        <h4>💡 Best Choice for Travel Right Now:</h4>
+        <div class="verdict-winner">🏆 <strong>${ranked[0].city.name}</strong> (${ranked[0].city.name_cn})</div>
+        <p>Based on current weather analysis — ideal temperature, comfortable humidity, and manageable wind conditions make this the top pick today.</p>
+    </div>`;
+
+    content.innerHTML = verdict;
+}
+
+// Auto-compare on load
+window.addEventListener('load', () => {
+    setTimeout(() => document.getElementById('compareBtn').click(), 500);
+});
+</script>
+{% endblock %}

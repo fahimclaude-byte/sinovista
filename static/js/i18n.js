@@ -6,7 +6,11 @@ const translations = {
     en: {
         // Navigation
         nav_home: "Home",
-        nav_cities: "Explore Cities",
+        nav_cities: "Cities",
+        nav_map: "🗺️ Map",
+        nav_compare: "📊 Compare",
+        nav_quiz: "🎮 Quiz",
+        nav_favorites: "⭐ Favorites",
         nav_alerts: "Alerts",
         nav_about: "About",
 
@@ -106,6 +110,10 @@ const translations = {
         // Navigation
         nav_home: "হোম",
         nav_cities: "শহরসমূহ",
+        nav_map: "🗺️ মানচিত্র",
+        nav_compare: "📊 তুলনা",
+        nav_quiz: "🎮 কুইজ",
+        nav_favorites: "⭐ পছন্দ",
         nav_alerts: "সতর্কতা",
         nav_about: "সম্পর্কে",
 
@@ -204,7 +212,11 @@ const translations = {
     zh: {
         // Navigation
         nav_home: "首页",
-        nav_cities: "探索城市",
+        nav_cities: "城市",
+        nav_map: "🗺️ 地图",
+        nav_compare: "📊 比较",
+        nav_quiz: "🎮 测验",
+        nav_favorites: "⭐ 收藏",
         nav_alerts: "天气警报",
         nav_about: "关于",
 

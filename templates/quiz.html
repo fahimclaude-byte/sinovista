@@ -1,0 +1,363 @@
+{% extends "base.html" %}
+
+{% block title %}China Knowledge Quiz — SinoVista{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <div class="section-container">
+        <h1 class="page-title">🎮 China Knowledge Quiz</h1>
+        <p class="page-subtitle">Test your knowledge about Chinese cities, culture, and geography!</p>
+    </div>
+</section>
+
+<section class="quiz-section">
+    <div class="section-container quiz-container">
+
+        <!-- Quiz Start Screen -->
+        <div id="quizStart" class="quiz-screen quiz-start">
+            <div class="quiz-hero-icon">🏯</div>
+            <h2 class="quiz-hero-title">Ready to Test Your China Knowledge?</h2>
+            <p class="quiz-hero-text">10 questions about Chinese cities, food, culture, and geography. How many can you get right?</p>
+            <div class="quiz-features">
+                <div class="quiz-feature">
+                    <div class="qf-icon">⏱️</div>
+                    <div class="qf-text">10 Questions</div>
+                </div>
+                <div class="quiz-feature">
+                    <div class="qf-icon">🎯</div>
+                    <div class="qf-text">4 Choices Each</div>
+                </div>
+                <div class="quiz-feature">
+                    <div class="qf-icon">🏆</div>
+                    <div class="qf-text">Score & Rank</div>
+                </div>
+                <div class="quiz-feature">
+                    <div class="qf-icon">💡</div>
+                    <div class="qf-text">Learn as You Play</div>
+                </div>
+            </div>
+            <button class="quiz-start-btn" onclick="startQuiz()">🚀 Start Quiz</button>
+        </div>
+
+        <!-- Quiz Active Screen -->
+        <div id="quizActive" class="quiz-screen quiz-active" style="display:none;">
+            <div class="quiz-header">
+                <div class="quiz-progress-wrapper">
+                    <div class="quiz-progress-text">
+                        Question <span id="currentQ">1</span> of <span id="totalQ">10</span>
+                    </div>
+                    <div class="quiz-progress-bar">
+                        <div class="quiz-progress-fill" id="progressFill"></div>
+                    </div>
+                </div>
+                <div class="quiz-score-display">
+                    <span class="score-label">Score:</span>
+                    <span class="score-value" id="currentScore">0</span>
+                </div>
+            </div>
+
+            <div class="quiz-question-card">
+                <div class="quiz-q-icon" id="qIcon">🏯</div>
+                <h2 class="quiz-q-text" id="questionText">Question loads here...</h2>
+                <div class="quiz-options" id="quizOptions"></div>
+                <div class="quiz-feedback" id="quizFeedback" style="display:none;"></div>
+            </div>
+
+            <div class="quiz-actions">
+                <button id="nextBtn" class="quiz-next-btn" style="display:none;" onclick="nextQuestion()">Next Question →</button>
+            </div>
+        </div>
+
+        <!-- Quiz Results Screen -->
+        <div id="quizResults" class="quiz-screen quiz-results" style="display:none;">
+            <div class="result-hero">
+                <div class="result-icon" id="resultIcon">🎉</div>
+                <h2 class="result-title" id="resultTitle">Quiz Complete!</h2>
+            </div>
+
+            <div class="result-score-card">
+                <div class="result-score-display">
+                    <span class="result-score-num" id="finalScore">0</span>
+                    <span class="result-score-total">/ 10</span>
+                </div>
+                <div class="result-rank" id="resultRank">Beginner</div>
+                <div class="result-percentage" id="resultPercent">0%</div>
+            </div>
+
+            <div class="result-stats">
+                <div class="result-stat">
+                    <div class="rs-num correct" id="correctCount">0</div>
+                    <div class="rs-label">Correct ✓</div>
+                </div>
+                <div class="result-stat">
+                    <div class="rs-num wrong" id="wrongCount">0</div>
+                    <div class="rs-label">Wrong ✗</div>
+                </div>
+                <div class="result-stat">
+                    <div class="rs-num" id="bestStreak">0</div>
+                    <div class="rs-label">Best Streak 🔥</div>
+                </div>
+            </div>
+
+            <div class="result-message" id="resultMessage"></div>
+
+            <div class="result-actions">
+                <button class="quiz-retry-btn" onclick="startQuiz()">🔄 Play Again</button>
+                <a href="/cities" class="quiz-explore-btn">🌏 Explore Cities</a>
+            </div>
+
+            <div class="result-share">
+                <p>📤 Share your score:</p>
+                <button class="share-btn" onclick="shareScore()">📋 Copy Score</button>
+            </div>
+        </div>
+
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+// Quiz Questions Database
+const QUESTIONS = [
+    {
+        icon: "🦆",
+        question: "Which Chinese city is most famous for Peking Duck?",
+        options: ["Shanghai", "Beijing", "Chengdu", "Xi'an"],
+        correct: 1,
+        explanation: "Peking Duck is a signature dish of Beijing (北京), dating back to the imperial era. Try it at Quanjude or Da Dong!"
+    },
+    {
+        icon: "🐼",
+        question: "Where can you find the famous Giant Panda Breeding Research Base?",
+        options: ["Kunming", "Chongqing", "Chengdu", "Guangzhou"],
+        correct: 2,
+        explanation: "Chengdu (成都) in Sichuan province is the panda capital of China and home to the world-famous panda research base."
+    },
+    {
+        icon: "🏯",
+        question: "Which city was the ancient capital that ended the Silk Road?",
+        options: ["Beijing", "Nanjing", "Xi'an", "Luoyang"],
+        correct: 2,
+        explanation: "Xi'an (西安) was the eastern terminus of the Silk Road and home to the Terracotta Army of Qin Shi Huang."
+    },
+    {
+        icon: "🌊",
+        question: "Which is the largest financial center in mainland China?",
+        options: ["Beijing", "Shenzhen", "Shanghai", "Guangzhou"],
+        correct: 2,
+        explanation: "Shanghai (上海) is mainland China's largest financial hub, home to the Shanghai Stock Exchange and iconic Pudong skyline."
+    },
+    {
+        icon: "🌶️",
+        question: "Sichuan cuisine is most famous for which flavor profile?",
+        options: ["Sweet & sour", "Spicy & numbing (mala)", "Salty & savory", "Mild & herbal"],
+        correct: 1,
+        explanation: "Sichuan food is famous for 'mala' (麻辣) — a unique combo of spicy chili and numbing Sichuan peppercorn!"
+    },
+    {
+        icon: "🏔️",
+        question: "Mount Everest's north face is located in which Chinese region?",
+        options: ["Xinjiang", "Tibet (Xizang)", "Qinghai", "Yunnan"],
+        correct: 1,
+        explanation: "The north face of Mount Everest (珠穆朗玛峰) is in Tibet, accessed from Lhasa. The southern face is in Nepal."
+    },
+    {
+        icon: "🏝️",
+        question: "Which city is known as China's tropical paradise?",
+        options: ["Sanya", "Xiamen", "Qingdao", "Dalian"],
+        correct: 0,
+        explanation: "Sanya (三亚) on Hainan Island is China's premier tropical beach destination — often called the 'Hawaii of China'."
+    },
+    {
+        icon: "🌸",
+        question: "Hangzhou's West Lake is famous for which season's beauty?",
+        options: ["Winter (snow)", "Spring (cherry blossoms)", "Summer (lotus)", "Autumn (foliage)"],
+        correct: 2,
+        explanation: "West Lake (西湖) is most stunning in summer when lotus flowers bloom across its waters. A UNESCO World Heritage site!"
+    },
+    {
+        icon: "🏙️",
+        question: "Which city was a small fishing village that became China's tech capital?",
+        options: ["Guangzhou", "Shenzhen", "Tianjin", "Wuhan"],
+        correct: 1,
+        explanation: "Shenzhen (深圳) was a fishing village in 1980 — now it's home to Huawei, Tencent, and DJI. China's Silicon Valley!"
+    },
+    {
+        icon: "🍵",
+        question: "Which Chinese city is most associated with traditional tea culture?",
+        options: ["Hangzhou", "Beijing", "Shanghai", "Harbin"],
+        correct: 0,
+        explanation: "Hangzhou (杭州) is famous for Longjing (Dragon Well) green tea, considered one of China's finest teas."
+    }
+];
+
+// Quiz state
+let currentQuestion = 0;
+let score = 0;
+let correctCount = 0;
+let wrongCount = 0;
+let currentStreak = 0;
+let bestStreak = 0;
+let answered = false;
+let shuffledQuestions = [];
+
+function shuffle(arr) {
+    return [...arr].sort(() => Math.random() - 0.5);
+}
+
+function startQuiz() {
+    currentQuestion = 0;
+    score = 0;
+    correctCount = 0;
+    wrongCount = 0;
+    currentStreak = 0;
+    bestStreak = 0;
+    shuffledQuestions = shuffle(QUESTIONS);
+
+    document.getElementById('quizStart').style.display = 'none';
+    document.getElementById('quizResults').style.display = 'none';
+    document.getElementById('quizActive').style.display = 'block';
+    document.getElementById('totalQ').textContent = shuffledQuestions.length;
+
+    showQuestion();
+}
+
+function showQuestion() {
+    answered = false;
+    const q = shuffledQuestions[currentQuestion];
+
+    document.getElementById('currentQ').textContent = currentQuestion + 1;
+    document.getElementById('currentScore').textContent = score;
+    document.getElementById('qIcon').textContent = q.icon;
+    document.getElementById('questionText').textContent = q.question;
+
+    const progress = ((currentQuestion) / shuffledQuestions.length) * 100;
+    document.getElementById('progressFill').style.width = `${progress}%`;
+
+    const optionsContainer = document.getElementById('quizOptions');
+    optionsContainer.innerHTML = q.options.map((opt, idx) => `
+        <button class="quiz-option" data-idx="${idx}" onclick="selectAnswer(${idx})">
+            <span class="option-letter">${String.fromCharCode(65 + idx)}</span>
+            <span class="option-text">${opt}</span>
+        </button>
+    `).join('');
+
+    document.getElementById('quizFeedback').style.display = 'none';
+    document.getElementById('nextBtn').style.display = 'none';
+}
+
+function selectAnswer(selectedIdx) {
+    if (answered) return;
+    answered = true;
+
+    const q = shuffledQuestions[currentQuestion];
+    const buttons = document.querySelectorAll('.quiz-option');
+    const isCorrect = selectedIdx === q.correct;
+
+    buttons.forEach((btn, idx) => {
+        btn.disabled = true;
+        if (idx === q.correct) {
+            btn.classList.add('correct');
+        } else if (idx === selectedIdx) {
+            btn.classList.add('wrong');
+        }
+    });
+
+    if (isCorrect) {
+        score++;
+        correctCount++;
+        currentStreak++;
+        bestStreak = Math.max(bestStreak, currentStreak);
+        document.getElementById('currentScore').textContent = score;
+    } else {
+        wrongCount++;
+        currentStreak = 0;
+    }
+
+    const feedback = document.getElementById('quizFeedback');
+    feedback.className = `quiz-feedback ${isCorrect ? 'correct' : 'wrong'}`;
+    feedback.innerHTML = `
+        <div class="feedback-header">
+            ${isCorrect ? '✅ Correct!' : '❌ Not quite!'}
+            ${currentStreak >= 3 ? `<span class="streak-badge">🔥 ${currentStreak} streak!</span>` : ''}
+        </div>
+        <div class="feedback-explanation">💡 ${q.explanation}</div>
+    `;
+    feedback.style.display = 'block';
+
+    const isLast = currentQuestion === shuffledQuestions.length - 1;
+    document.getElementById('nextBtn').textContent = isLast ? 'See Results 🏆' : 'Next Question →';
+    document.getElementById('nextBtn').style.display = 'inline-block';
+}
+
+function nextQuestion() {
+    currentQuestion++;
+    if (currentQuestion >= shuffledQuestions.length) {
+        showResults();
+    } else {
+        showQuestion();
+    }
+}
+
+function showResults() {
+    document.getElementById('quizActive').style.display = 'none';
+    document.getElementById('quizResults').style.display = 'block';
+
+    const percent = Math.round((score / shuffledQuestions.length) * 100);
+    document.getElementById('finalScore').textContent = score;
+    document.getElementById('correctCount').textContent = correctCount;
+    document.getElementById('wrongCount').textContent = wrongCount;
+    document.getElementById('bestStreak').textContent = bestStreak;
+    document.getElementById('resultPercent').textContent = percent + '%';
+
+    let rank, icon, message;
+    if (percent === 100) {
+        rank = '🏆 China Master!';
+        icon = '👑';
+        message = 'Incredible! You are a true China expert. You should be a tour guide!';
+    } else if (percent >= 80) {
+        rank = '🥇 China Expert';
+        icon = '🌟';
+        message = 'Excellent! You know China very well. Time to plan that trip!';
+    } else if (percent >= 60) {
+        rank = '🥈 China Enthusiast';
+        icon = '😎';
+        message = 'Good job! You have solid knowledge about China. Keep exploring!';
+    } else if (percent >= 40) {
+        rank = '🥉 Curious Traveler';
+        icon = '🤔';
+        message = 'Nice try! You\'ve learned something today. Explore SinoVista to learn more!';
+    } else {
+        rank = '🌱 Beginner';
+        icon = '📚';
+        message = 'Don\'t worry! Every expert was once a beginner. Browse our cities to learn!';
+    }
+
+    document.getElementById('resultRank').textContent = rank;
+    document.getElementById('resultIcon').textContent = icon;
+    document.getElementById('resultMessage').textContent = message;
+
+    // Save high score to localStorage
+    try {
+        const prevHigh = parseInt(localStorage.getItem('sinovista_high_score') || '0');
+        if (score > prevHigh) {
+            localStorage.setItem('sinovista_high_score', score.toString());
+        }
+    } catch (e) {}
+}
+
+function shareScore() {
+    const percent = Math.round((score / shuffledQuestions.length) * 100);
+    const text = `🏯 I scored ${score}/${shuffledQuestions.length} (${percent}%) on SinoVista's China Knowledge Quiz! Can you beat me? 🇨🇳\n\nTry it at sinovista.onrender.com`;
+
+    if (navigator.clipboard) {
+        navigator.clipboard.writeText(text).then(() => {
+            alert('Score copied! Share it with your friends!');
+        });
+    } else {
+        alert(text);
+    }
+}
+</script>
+{% endblock %}

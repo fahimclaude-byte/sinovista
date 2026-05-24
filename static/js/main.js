@@ -144,3 +144,66 @@ function formatChatResponse(text) {
         .replace(/\*(.*?)\*/g, '<em>$1</em>')
         .replace(/\n/g, '<br>');
 }
+
+// ============================================================
+// Favorites System (localStorage)
+// ============================================================
+
+function getFavorites() {
+    try {
+        return JSON.parse(localStorage.getItem('sinovista_favorites') || '[]');
+    } catch (e) { return []; }
+}
+
+function saveFavorites(favs) {
+    localStorage.setItem('sinovista_favorites', JSON.stringify(favs));
+}
+
+function isFavorite(cityName) {
+    return getFavorites().includes(cityName);
+}
+
+function toggleCityFav(cityName) {
+    const favs = getFavorites();
+    const idx = favs.indexOf(cityName);
+    if (idx > -1) {
+        favs.splice(idx, 1);
+        showToast(`💔 ${cityName} removed from favorites`);
+    } else {
+        favs.push(cityName);
+        showToast(`⭐ ${cityName} added to favorites!`);
+    }
+    saveFavorites(favs);
+    updateFavButton(cityName);
+}
+
+function updateFavButton(cityName) {
+    const btn = document.querySelector(`#cityFavBtn[data-city="${cityName}"]`);
+    if (btn) {
+        const isFav = isFavorite(cityName);
+        btn.textContent = isFav ? '⭐' : '☆';
+        btn.classList.toggle('is-fav', isFav);
+        btn.title = isFav ? 'Remove from favorites' : 'Add to favorites';
+    }
+}
+
+function showToast(message) {
+    let toast = document.getElementById('sinovistaToast');
+    if (!toast) {
+        toast = document.createElement('div');
+        toast.id = 'sinovistaToast';
+        toast.className = 'sinovista-toast';
+        document.body.appendChild(toast);
+    }
+    toast.textContent = message;
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 2500);
+}
+
+// Initialize fav buttons on page load
+document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('#cityFavBtn').forEach(btn => {
+        const cityName = btn.dataset.city;
+        if (cityName) updateFavButton(cityName);
+    });
+});

@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+
+{% block title %}Favorites — SinoVista{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <div class="section-container">
+        <h1 class="page-title">⭐ My Favorite Cities</h1>
+        <p class="page-subtitle">Quick access to cities you love</p>
+    </div>
+</section>
+
+<section class="favorites-section">
+    <div class="section-container">
+
+        <!-- Empty state -->
+        <div id="favEmptyState" class="empty-state" style="display:none;">
+            <div class="empty-icon">⭐</div>
+            <h3>No favorites yet!</h3>
+            <p>Star your favorite cities to add them here. They'll be saved in your browser.</p>
+            <a href="/cities" class="cta-btn">Browse All Cities</a>
+        </div>
+
+        <!-- Favorites grid -->
+        <div id="favoritesGrid" class="favorites-grid"></div>
+
+        <!-- Actions bar -->
+        <div id="favActions" class="fav-actions" style="display:none;">
+            <button onclick="clearAllFavorites()" class="fav-clear-btn">🗑️ Clear All Favorites</button>
+        </div>
+    </div>
+</section>
+
+<script>
+const ALL_CITIES = {{ cities|tojson }};
+
+function getFavorites() {
+    try {
+        return JSON.parse(localStorage.getItem('sinovista_favorites') || '[]');
+    } catch (e) {
+        return [];
+    }
+}
+
+function saveFavorites(favs) {
+    localStorage.setItem('sinovista_favorites', JSON.stringify(favs));
+}
+
+function toggleFavorite(cityName) {
+    const favs = getFavorites();
+    const idx = favs.indexOf(cityName);
+    if (idx > -1) {
+        favs.splice(idx, 1);
+    } else {
+        favs.push(cityName);
+    }
+    saveFavorites(favs);
+    renderFavorites();
+}
+
+function clearAllFavorites() {
+    if (confirm('Are you sure you want to remove all favorite cities?')) {
+        saveFavorites([]);
+        renderFavorites();
+    }
+}
+
+function renderFavorites() {
+    const favs = getFavorites();
+    const grid = document.getElementById('favoritesGrid');
+    const empty = document.getElementById('favEmptyState');
+    const actions = document.getElementById('favActions');
+
+    if (favs.length === 0) {
+        grid.innerHTML = '';
+        empty.style.display = 'block';
+        actions.style.display = 'none';
+        return;
+    }
+
+    empty.style.display = 'none';
+    actions.style.display = 'block';
+
+    const favCities = favs.map(name => ALL_CITIES.find(c => c.name === name)).filter(c => c);
+
+    grid.innerHTML = favCities.map(city => `
+        <div class="fav-card">
+            <button class="fav-remove" onclick="toggleFavorite('${city.name}')" title="Remove from favorites">⭐</button>
+            <a href="/city/${encodeURIComponent(city.name)}" class="fav-card-link">
+                <div class="fav-province">${city.province}</div>
+                <h3 class="fav-name">${city.name}</h3>
+                <div class="fav-cn">${city.name_cn}</div>
+                <p class="fav-desc">${city.description.substring(0, 100)}...</p>
+                <div class="fav-meta">
+                    <span>📅 ${city.best_season}</span>
+                    <span class="fav-arrow">→</span>
+                </div>
+            </a>
+        </div>
+    `).join('');
+}
+
+document.addEventListener('DOMContentLoaded', renderFavorites);
+</script>
+{% endblock %}
