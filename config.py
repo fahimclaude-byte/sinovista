@@ -24,7 +24,7 @@ Zhengzhou University, China
 # Sign up: https://platform.deepseek.com
 # Get key: https://platform.deepseek.com/api_keys
 
-AI_API_KEY = "YOUR_API_KEY_HERE"   # ← Replace with your DeepSeek key
+AI_API_KEY = "sk-8a33f794b643423c9dcce9a78b098059"   # ← Replace with your DeepSeek key
 AI_PROVIDER = "DeepSeek"
 AI_MODEL = "deepseek-chat"
 AI_BASE_URL = "https://api.deepseek.com/v1/chat/completions"
